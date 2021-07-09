@@ -98,7 +98,7 @@ router.delete("/user/delete/:id", auth, async (req, res) => {
     if (err) {
       res.status(400).send({ code: 400, message: err });
     } else {
-      res.status(200).send.send({ docs, message: "deleted successfully" });
+      res.status(200).send({ docs, message: "deleted successfully" });
     }
   });
 });
