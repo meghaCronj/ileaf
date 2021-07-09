@@ -90,13 +90,17 @@ router.patch("/user/detail", auth, async (req, res) => {
 });
 
 // delete
-router.delete("/user/detail", auth, async (req, res) => {
-  try {
-    await req.participants.remove();
-    res.status(200).send(req.participants);
-  } catch (e) {
-    res.status(500).send(e);
-  }
+
+router.delete("/user/delete/:id", auth, async (req, res) => {
+  const id = req.params.id;
+  if (!id) throw new Error("Id required to update");
+  Participants.findOneAndDelete({ _id: id }, function (err, docs) {
+    if (err) {
+      res.status(400).send({ code: 400, message: err });
+    } else {
+      res.status(200).send.send({ docs, message: "deleted successfully" });
+    }
+  });
 });
 
 // get by meeting id
