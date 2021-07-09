@@ -25,7 +25,7 @@ router.post("/user/login", async (req, res) => {
       req.body.password
     );
     const token = await participants.generateAuthToken();
-    res.send({ participants, token });
+    res.status(200).send({ participants, token });
   } catch (e) {
     res.status(400).send();
   }
@@ -39,7 +39,7 @@ router.post("/user/logout", auth, async (req, res) => {
     });
     await req.participants.save();
 
-    res.send();
+    res.status(200).send();
   } catch (e) {
     res.status(500).send();
   }
@@ -49,19 +49,67 @@ router.post("/user/logout", auth, async (req, res) => {
 router.get("/user/getAll", auth, async (req, res) => {
   try {
     const participants = await Participants.find({});
-    res.send(participants);
+    res.status(200).send(participants);
   } catch (e) {
     res.status(500).send(e);
   }
 });
 
 // get individual participant details
-router.get("/user/me", auth, async (req, res) => {
+router.get("/user/detail", auth, async (req, res) => {
   try {
-    res.send(req.participants);
+    res.status(200).send(req.participants);
   } catch (e) {
     res.status(500).send(e);
   }
 });
 
+// update
+router.patch("/user/detail", auth, async (req, res) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = [
+    "firstName",
+    "email",
+    "lastName",
+    "meetingId",
+    "phone",
+  ];
+  const isValidUpdates = updates.every((update) =>
+    allowedUpdates.includes(update)
+  );
+  if (!isValidUpdates) {
+    res.status(400).send({ error: "Invalid updates" });
+  }
+  try {
+    updates.forEach((update) => (req.participants[update] = req.body[update]));
+    await req.participants.save();
+    res.status(200).send(req.participants);
+  } catch (e) {
+    res.status(400).send();
+  }
+});
+
+// delete
+router.delete("/user/detail", auth, async (req, res) => {
+  try {
+    await req.participants.remove();
+    res.status(200).send(req.participants);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+// get by meeting id
+router.get("/user/meeting/:id", auth, async (req, res) => {
+  const id = req.params.id;
+  if (!id) throw new Error("id is required");
+
+  try {
+    const user = await Participants.find({ meetingId: id });
+
+    res.status(200).send(user);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
 module.exports = router;
