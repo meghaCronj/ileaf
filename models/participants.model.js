@@ -41,6 +41,7 @@ const participantsSchema = new mongoose.Schema({
       },
     },
   ],
+  meetingId: { type: mongoose.Schema.ObjectId, ref: "Meeting" },
 });
 
 participantsSchema.pre("save", async function (next) {
